@@ -51,7 +51,7 @@
   gcloud spanner databases ddl update test-database --ddl="CREATE TABLE todo(id STRING(36), title STRING(30), finished BOOL, created_at TIMESTAMP) PRIMARY KEY (id)"  --instance=test-instance 
   ```
 
-## サンプルAPを作成
+## サンプルAPの作成や実行
 ###  Spring Initializrでベース作成
 - Spring Boot 2.5.0は未対応なので、2.4.xの必要
 - Spring Cloud GCPを選択してZipをDLする。
@@ -68,7 +68,7 @@
   spring.cloud.gcp.spanner.emulator.enabled=true
   ```
 
-### サンプルAPの作成
+### サンプルAPのRepositoryやロジック実装
 - TERASOLUNA FrameworkのTODOアプリのServiceを真似て作成。
   - https://terasolunaorg.github.io/guideline/5.7.0.RELEASE/ja/Tutorial/TutorialTodo.html#service
 - First Stepなので、JOINが無い、1TBLのAPとした。
