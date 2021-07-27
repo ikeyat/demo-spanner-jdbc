@@ -23,8 +23,9 @@
      gcloud config set project demo-spanner
      gcloud config set api_endpoint_overrides/spanner http://host.docker.internal:9020/
      ```
-      - `host.docker.internal`に変更している理由について。CLIのDockerから見たSpannerエミュレータの宛先はlocalhostではないため。
-             - https://qiita.com/ijufumi/items/badde64d530e6bade382#%E3%81%9D%E3%81%AE5hostdockerinternal-%E3%82%92%E4%BD%BF%E3%81%86-20190916%E8%BF%BD%E8%A8%9820200227%E7%B7%A8%E9%9B%86
+
+    - `host.docker.internal`に変更している理由について。CLIのDockerから見たSpannerエミュレータの宛先はlocalhostではないため。
+      - https://qiita.com/ijufumi/items/badde64d530e6bade382#%E3%81%9D%E3%81%AE5hostdockerinternal-%E3%82%92%E4%BD%BF%E3%81%86-20190916%E8%BF%BD%E8%A8%9820200227%E7%B7%A8%E9%9B%86
   - CLI Docker内のまま、インスタンスを作成。
 
      ```
@@ -78,7 +79,7 @@
   - `ApplicationRunner`で起動時にレコード追加や削除を適当にしている。結果がログに出るので、正常に動いたかを確認。
   - Spring Cloud SpannerのログをDEBUGレベルにしているので、邪魔な場合はログレベルを修正すること（application.properties）。
   -  最後にレコードをすべて削除するサンプルAPにしているが、エラーなどで途中でアベンドしDBにデータが残ってしまった場合、次回実行時に想定通り動かない。「TBL準備」のテーブル削除＆作成手順によりレコードをリセットすること。
-    - RDB向けの`schema.sql`や`data.sql`相当機能が無いのが辛い。 
+     - RDB向けの`schema.sql`や`data.sql`相当機能が無いのが辛い。 
   
 ## 公式サンプルを試す（TODO）
 - https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-data-spanner-sample
