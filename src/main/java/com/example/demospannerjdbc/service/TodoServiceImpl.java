@@ -1,4 +1,4 @@
-package com.example.demospanner.service;
+package com.example.demospannerjdbc.service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demospanner.model.Todo;
-import com.example.demospanner.repository.TodoRepository;
+import com.example.demospannerjdbc.model.Todo;
+import com.example.demospannerjdbc.repository.TodoRepository;
 
 // https://terasolunaorg.github.io/guideline/5.7.0.RELEASE/ja/Tutorial/TutorialTodo.html#service
 // を真似して作る
@@ -42,7 +42,7 @@ public class TodoServiceImpl implements TodoService {
 		todo.setCreatedAt(createdAt);
 		todo.setFinished(false);
 
-		todoRepository.save(todo);
+		todoRepository.insert(todo);
 		return todo;
 	}
 
@@ -53,7 +53,7 @@ public class TodoServiceImpl implements TodoService {
 			throw new RuntimeException("[E002] The requested Todo is already finished. (id=" + todoId + ")");
 		}
 		todo.setFinished(true);
-		todoRepository.save(todo);
+		todoRepository.update(todo);
 		return todo;
 	}
 

@@ -1,22 +1,15 @@
-package com.example.demospanner.model;
+package com.example.demospannerjdbc.model;
 
 import java.time.LocalDateTime;
 
-import com.google.cloud.spring.data.spanner.core.mapping.Column;
-import com.google.cloud.spring.data.spanner.core.mapping.PrimaryKey;
-import com.google.cloud.spring.data.spanner.core.mapping.Table;
-
-@Table(name = "todo")
 public class Todo {
 
-	@PrimaryKey
 	private String id;
 
 	private String title;
 
 	private Boolean finished;
 
-	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
 	public Todo() {

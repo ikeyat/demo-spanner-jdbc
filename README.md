@@ -1,10 +1,19 @@
 # メモ
+## 経緯
+- Spring Data Cloud Spannerを試したが、従来のDBアクセスライブラリよりもできることが少ない印象だった。
+  - https://github.com/ikeyat/demo-spanner
+- 一方、JDBC版だと、コネクションプールがネックになったりしないか、機能制約や動作不安定がないかが気になる。
+- SpannerのJDBCを用いて、従来のDBアクセスライブラリでSpannerを利用してみる。
+
 ## 前提
 - MacOS
 - Docker
 - インターネット接続可能（Google Container Registryへのアクセス）
 - Spring Boot
-- Spring Data Cloud Spanner
+- MyBatis
+- オープンソース版Spanner JDBC
+  - 他にSimba版Spanner JDBCもあるが、それはTODO
+  - https://cloud.google.com/spanner/docs/jdbc-drivers
 
 ## 準備
 ### Cloud CLIのインストール（Dockerイメージ）
@@ -54,36 +63,49 @@
   ```
 
 ## サンプルAPの作成や実行
-###  Spring Initializrでベース作成
-- Spring Boot 2.5.0は未対応なので、2.4.xの必要
-- Spring Cloud GCPを選択してZipをDLする。
-  - pomのgroupIdは`com.google.cloud`だが、これは正しい（リファレンスだと`org.springframework.cloud`となっているが、リファレンス側の最新化漏れぽい）。
-- Spring Cloud GCP全体のstarterが設定されているので、`spring-cloud-gcp-starter-data-spanner`に修正。
+###  Spring Data Cloud SpannerのサンプルAPから修正
+- https://github.com/ikeyat/demo-spanner
+- Spring Data Cloud Spannerと比較するため、Spring Boot 2.4.xのままにする。
+- Spring Cloud GCP等の依存関係を削除し、mybatisのstarterと、オープンソース版のSpanner JDBC Driverの依存関係を追加。
+  - https://github.com/googleapis/java-spanner-jdbc#quickstart
 
 ### Spannerエミュレータ接続設定
-- application.ymlには、エミュレータ準備時に設定した以下の値を入れる。
+- application.propertiesには、エミュレータ準備時に設定した以下の値を入れる。
+- 接続文字列はSpanner JDBC Driverのドキュメントに従う。
+  - エミュレータの場合は、`sePlainText=true`が必要
+  - エミュレータの場合は、`export SPANNER_EMULATOR_HOST=localhost:9010`するのが一般的らしいが、環境変数だと設定漏れしそうなので、接続文字列にエミュレータ接続先を含めてしまう方法を採用。
+     - https://cloud.google.com/spanner/docs/use-oss-jdbc#connecting_to_the_emulator
 
-  ```
-  spring.cloud.gcp.spanner.instance-id=test-instance
-  spring.cloud.gcp.spanner.database=test-database
-  spring.cloud.gcp.spanner.project-id=demo-spanner
-  spring.cloud.gcp.spanner.emulator.enabled=true
-  ```
+     ```
+     spring.datasource.driver-class-name=com.google.cloud.spanner.jdbc.JdbcDriver
+  spring.datasource.url=jdbc:cloudspanner:${demo.spanner.host}/projects/${demo.spanner.project-id}/instances/${demo.spanner.instance-id}/databases/${demo.spanner.database-id};${demo.spanner.option}
 
-### サンプルAPのRepositoryやロジック実装
-- TERASOLUNA FrameworkのTODOアプリのServiceを真似て作成。
-  - https://terasolunaorg.github.io/guideline/5.7.0.RELEASE/ja/Tutorial/TutorialTodo.html#service
-- First Stepなので、JOINが無い、1TBLのAPとした。
-- 簡単のため、Webアプリではなく、コマンドラインAP（ApplicationRunner）で実装。
+     demo.spanner.host=//localhost:9010
+     demo.spanner.project-id=demo-spanner
+     demo.spanner.instance-id=test-instance
+     demo.spanner.database-id=test-database
+     demo.spanner.option=usePlainText=true
+     ```
+
+### サンプルAPのRepositoryやロジック修正
+- groupidやpackage名は元から変更しておく。
+- RepositoryやModelをMyBatisに対応させるため修正。
+  - CrudReposiroryの`save()`、すなわちupsert相当をMyBatisでは実現できないため、`insert()`と`update()`に分割。
+- オープンソース版Spanner JDBCはJDBC4.2に未対応と思われ（公式に記載なし）、`LocalDateTime`を扱う場合はMyBatisの`TypeHandler`を拡張する必要がある。
+  - 本来JDBC4.2で扱える`LocalDateTime`をSQLにパラメータバインドしようとすると、以下のエラー。
+
+     ```
+     Caused by: org.springframework.jdbc.UncategorizedSQLException: 
+     ### Error updating database.  Cause: com.google.cloud.spanner.jdbc.JdbcSqlExceptionFactory$JdbcSqlExceptionImpl: INVALID_ARGUMENT: Unsupported parameter type: java.time.LocalDateTime - 2021-07-28T21:43:48.744780
+     ```
+  - MyBatisが、JDBC4.2対応するタイミングで行った修正をもとに戻すような拡張をしてあげる。
+     - https://github.com/mybatis/mybatis-3/commit/963a8a577bc1d9a98e5182a7779a85a3ca834984
 
 ### サンプルAPの実行
 - DemoApplicationをSpringBootで実行（STSからでOK）
   - `ApplicationRunner`で起動時にレコード追加や削除を適当にしている。結果がログに出るので、正常に動いたかを確認。
-  - Spring Cloud SpannerのログをDEBUGレベルにしているので、邪魔な場合はログレベルを修正すること（application.properties）。
-  -  最後にレコードをすべて削除するサンプルAPにしているが、エラーなどで途中でアベンドしDBにデータが残ってしまった場合、次回実行時に想定通り動かない。「TBL準備」のテーブル削除＆作成手順によりレコードをリセットすること。
-     - RDB向けの`schema.sql`や`data.sql`相当機能が無いのが辛い。 
-  
-## 公式サンプルを試す（TODO）
-- https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-data-spanner-sample
-- git cloneしてきて、`spring-cloud-gcp-data-spanner-sample`を`mvn install`
-  - mvnでartifactがないとエラーが出てくる。SNAPSHOTが格納されているrepositoryを追加必要ぽく面倒なので、一旦保留。
+  - Spring Data Cloud Spannerと異なり、RDB向けの`schema.sql`や`data.sql`が使えるので、そちらでテーブルを起動時に初期化するようにした。 
+     - ただし、Spannerは`DROP TABLE xxx IF EXISTS`のような構文に対応していないため、TBLが存在しないと初期化エラーになってしまう。仕方ないので、`spring.datasource.continue-on-error=true` で初期化エラーを無視するようにする。
+- オープンソース版Spanner JDBCのせいか、Spanner自体の問題かは不明だが、時々原因不明のSQL失敗エラーが発生し、二度と動かなくなる。SpannerエミュレータのDockerコンテナを再起動し、インスタンスを作り直せば当然直るが、原因は気になる。
+
+

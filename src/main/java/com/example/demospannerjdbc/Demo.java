@@ -1,4 +1,4 @@
-package com.example.demospanner;
+package com.example.demospannerjdbc;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -7,8 +7,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.example.demospanner.model.Todo;
-import com.example.demospanner.service.TodoService;
+import com.example.demospannerjdbc.model.Todo;
+import com.example.demospannerjdbc.service.TodoService;
 
 @Component
 public class Demo implements ApplicationRunner {

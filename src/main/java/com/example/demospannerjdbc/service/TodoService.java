@@ -1,6 +1,6 @@
-package com.example.demospanner.service;
+package com.example.demospannerjdbc.service;
 
-import com.example.demospanner.model.Todo;
+import com.example.demospannerjdbc.model.Todo;
 
 public interface TodoService {
 	Iterable<Todo> findAll();
