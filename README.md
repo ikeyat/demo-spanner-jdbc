@@ -3,6 +3,8 @@
 - MacOS
 - Docker
 - インターネット接続可能（Google Container Registryへのアクセス）
+- Spring Boot
+- Spring Data Cloud Spanner
 
 ## 準備
 ### Cloud CLIのインストール（Dockerイメージ）
