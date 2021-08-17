@@ -78,8 +78,8 @@
 
      ```
      spring.datasource.driver-class-name=com.google.cloud.spanner.jdbc.JdbcDriver
-  spring.datasource.url=jdbc:cloudspanner:${demo.spanner.host}/projects/${demo.spanner.project-id}/instances/${demo.spanner.instance-id}/databases/${demo.spanner.database-id};${demo.spanner.option}
-
+     spring.datasource.url=jdbc:cloudspanner:${demo.spanner.host}/projects/${demo.spanner.project-id}/instances/${demo.spanner.instance-id}/databases/${demo.spanner.database-id};${demo.spanner.option}
+     
      demo.spanner.host=//localhost:9010
      demo.spanner.project-id=demo-spanner
      demo.spanner.instance-id=test-instance
